@@ -1,61 +1,53 @@
 function MI3_5_merge_data(recordingFolder, filtered_dir_names)
-recordingFolder1 = 'C:\Users\yaels\Desktop\Recordings\Sub20220811002';
-recordingFolder2 = 'C:\Users\yaels\Desktop\Recordings\Sub20220811003';
 numTrials = 60;
 
 %merge trainig vectors
-trainingVec1 = load(strcat(recordingFolder1,'/trainingVec.mat'));
-trainingVec2 = load(strcat(recordingFolder2,'/trainingVec.mat'));
+tempTrainingVec1 = load(strcat(char(filtered_dir_names(1)),'/trainingVec.mat'));
+tempTrainingVec1 = cell2mat(struct2cell(tempTrainingVec1));
 
-trainingVec1 = cell2mat(struct2cell(trainingVec1));
-trainingVec2 = cell2mat(struct2cell(trainingVec2));
+trainingVec = [];
+current_trial = 0;
 
-if size(trainingVec1,2) ~= size(trainingVec2,2) && size(trainingVec1,3) ~= size(trainingVec2,3)
-    disp('training vector files not of same size!');
-else
-    trainingVec = zeros(1,length(trainingVec1));
-    for trial = 1:length(trainingVec1)
-        trainingVec(trial) = trainingVec1(trial);
+for i = 1:length(filtered_dir_names)
+    tempTrainingVec = load(strcat(char(filtered_dir_names(i)),'/trainingVec.mat'));
+    tempTrainingVec = cell2mat(struct2cell(tempTrainingVec));
+    if size(tempTrainingVec1,2) ~= size(tempTrainingVec,2) && size(tempTrainingVec1,3) ~= size(tempTrainingVec,3)
+        fprintf('training vector from %s is not the same size as training vector from %s\n', char(filtered_dir_names(i)), char(filtered_dir_names(1)));
+    else
+        for trial = 1:length(tempTrainingVec)
+            trainingVec(trial+current_trial) = tempTrainingVec(trial);
+        end
+        current_trial = current_trial + length(tempTrainingVec);
     end
-    for trial = length(trainingVec1)+1:length(trainingVec1)+length(trainingVec2)
-        trainingVec(trial) = trainingVec2(trial-length(trainingVec1));
-    end
-    %size(trainingVec)
-    save(strcat(recordingFolder,'/trainingVec.mat'),'trainingVec');
 end
+save(strcat(recordingFolder,'/trainingVec.mat'),'trainingVec');
 
 %merge MIData
-data1 = load(strcat(recordingFolder1,'/MIData.mat'));
-data2 = load(strcat(recordingFolder2,'/MIData.mat'));
+tempMIData1 = load(strcat(char(filtered_dir_names(1)),'/MIData.mat'));
+tempMIData1 = cell2mat(struct2cell(tempMIData1));
 
-matrix1 = cell2mat(struct2cell(data1));
-matrix2 = cell2mat(struct2cell(data2));
+MIData = [];
+current_trial = 0;
 
-if size(matrix1,1) ~= numTrials
-    disp('File 1 corrupted!');
-    fprintf('File 1 has %d trials instead of %d\n', size(matrix1,1), numTrials);
-end
-
-if size(matrix2,1) ~= numTrials
-    disp('File 2 corrupted!');
-    fprintf('File 2 has %d trials instead of %d\n', size(matrix2,1), numTrials);
-end
-
-if size(matrix1,2) ~= size(matrix2,2) && size(matrix1,3) ~= size(matrix2,3)
-    disp('MIData files not of same size!');
-else
-    MIData = zeros(length(matrix1(:,1,1))+length(matrix2(:,1,1)),length(matrix1(1,:,1)),length(matrix1(1,1,:)));
-    for trial = 1:length(matrix1(:,1,1))
-        MIData(trial,:,:) = matrix1(trial,:,:);
+for i = 1:length(filtered_dir_names)
+    tempMIData = load(strcat(char(filtered_dir_names(i)),'/MIData.mat'));
+    tempMIData = cell2mat(struct2cell(tempMIData));
+    if size(tempMIData,1) ~= numTrials
+        fprintf('%s corrupted!\n', strcat(char(filtered_dir_names(i)),'/MIData.mat'));
+        fprintf('%s has %d trials instead of %d\n', strcat(char(filtered_dir_names(i)),'/MIData.mat'), size(tempMIData,1), numTrials);
     end
-    for trial = length(matrix1(:,1,1))+1:length(matrix1(:,1,1))+length(matrix2(:,1,1))
-        MIData(trial,:,:) = matrix2(trial-length(matrix1(:,1,1)),:,:);
+    if size(tempMIData1,2) ~= size(tempMIData,2) && size(tempMIData1,3) ~= size(tempMIData,3)
+        fprintf('MIData from %s is not the same size as MIData from %s\n', char(filtered_dir_names(i)), char(filtered_dir_names(1)));
+    else
+        for trial = 1:length(tempMIData(:,1,1))
+            MIData(trial+current_trial,:,:) = tempMIData(trial,:,:);
+        end
+        current_trial = current_trial + length(tempMIData(:,1,1));
     end
-    %size(MIData)
-    save(strcat(recordingFolder,'/MIData.mat'),'MIData');
 end
+save(strcat(recordingFolder,'/MIData.mat'),'MIData');
 
 %copy additional files
-copyfile(strcat(recordingFolder1,'/EEG_chans.mat'), recordingFolder);
+copyfile(strcat(char(filtered_dir_names(1)),'/EEG_chans.mat'), recordingFolder);
 
 end

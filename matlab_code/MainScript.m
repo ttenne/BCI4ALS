@@ -22,9 +22,12 @@ clc; clear; close all;
 recordingsFolder = 'C:\Users\yaels\Desktop\Recordings\';
 listdir = dir(recordingsFolder);
 dir_names = {listdir().name};
+for i = 1:length(dir_names)
+    dir_names(i) = strcat(recordingsFolder, dir_names(i));
+end
 
-start_dir = 'Sub20220811002';
-end_dir = 'Sub20220811003';
+start_dir = strcat(recordingsFolder,'Sub20220811002');
+end_dir = strcat(recordingsFolder,'Sub20220816002');
 
 filtered_dir_names = {};
 should_append = false;
@@ -43,15 +46,15 @@ for i = 1:length(dir_names)
 end
 
 for i = 1:length(filtered_dir_names)
-    recordingFolder = strcat(recordingsFolder,char(filtered_dir_names(i)));
+    recordingFolder = char(filtered_dir_names(i));
     %% Run pre-processing pipeline on recorded data
     MI2_preprocess(recordingFolder);
     disp('Finished pre-processing pipeline. Press any key to continue...');
-    pause;
+    %pause;
     %% Segment data by trials
     MI3_segmentation(recordingFolder);
     disp('Finished segmenting the data. Press any key to continue...');
-    pause;
+    %pause;
 end
 
 recordingFolder ='C:\Users\yaels\Desktop\UnitedRecordings';
@@ -69,4 +72,3 @@ pause;
 %% Train a model using features and labels
 testresult = MI5_modelTraining(recordingFolder);
 disp('Finished training the model. The offline process is done!');
-
