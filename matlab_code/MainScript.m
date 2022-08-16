@@ -27,7 +27,7 @@ for i = 1:length(dir_names)
 end
 
 start_dir = strcat(recordingsFolder,'Sub20220811002');
-end_dir = strcat(recordingsFolder,'Sub20220816002');
+end_dir = strcat(recordingsFolder,'Sub20220816004');
 
 filtered_dir_names = {};
 should_append = false;
