@@ -19,20 +19,45 @@ clc; clear; close all;
 %disp('Finished stimulation and EEG recording. Stop the LabRecorder and press any key to continue...');
 %pause;
 
-recordingFolder ='C:\Recordings\Sub20220811merged';
-%recordingFolder ='C:\Recordings\Sub20220811003';
+recordingsFolder = 'C:\Users\yaels\Desktop\Recordings\';
+listdir = dir(recordingsFolder);
+dir_names = {listdir().name};
 
-%% Run pre-processing pipeline on recorded data
-%MI2_preprocess(recordingFolder);
-%disp('Finished pre-processing pipeline. Press any key to continue...');
-%pause;
-%% Segment data by trials
-%MI3_segmentation(recordingFolder);
-%disp('Finished segmenting the data. Press any key to continue...');
-%pause;
+start_dir = 'Sub20220811002';
+end_dir = 'Sub20220811003';
+
+filtered_dir_names = {};
+should_append = false;
+count = 1;
+for i = 1:length(dir_names)
+    if strcmp(dir_names(i), start_dir)
+        should_append = true;
+    end
+    if should_append == true
+        filtered_dir_names(count) = dir_names(i);
+        count = count+1;
+    end
+    if strcmp(dir_names(i), end_dir)
+        should_append = false;
+    end
+end
+
+for i = 1:length(filtered_dir_names)
+    recordingFolder = strcat(recordingsFolder,char(filtered_dir_names(i)));
+    %% Run pre-processing pipeline on recorded data
+    MI2_preprocess(recordingFolder);
+    disp('Finished pre-processing pipeline. Press any key to continue...');
+    pause;
+    %% Segment data by trials
+    MI3_segmentation(recordingFolder);
+    disp('Finished segmenting the data. Press any key to continue...');
+    pause;
+end
+
+recordingFolder ='C:\Users\yaels\Desktop\UnitedRecordings';
 
 %% Merge several sessions
-MI3_5_merge_data(recordingFolder);
+MI3_5_merge_data(recordingFolder, filtered_dir_names);
 disp('Finished merging the data. Press any key to continue...');
 pause;
 

@@ -1,6 +1,6 @@
-function MI3_5_merge_data(recordingFolder)
-recordingFolder1 = 'C:\Recordings\Sub20220811002';
-recordingFolder2 = 'C:\Recordings\Sub20220811003';
+function MI3_5_merge_data(recordingFolder, filtered_dir_names)
+recordingFolder1 = 'C:\Users\yaels\Desktop\Recordings\Sub20220811002';
+recordingFolder2 = 'C:\Users\yaels\Desktop\Recordings\Sub20220811003';
 numTrials = 60;
 
 %merge trainig vectors

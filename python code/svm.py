@@ -6,7 +6,7 @@ def accuracy(y_test, y_pred):
     return np.sum(y_test==y_pred)/y_test.shape[0]
 
 # path = 'C:\\Recordings\\Sub20220811003'
-path = 'C:\\Recordings\\Sub20220811merged'
+path = 'C:\\Users\\yaels\\Desktop\\UnitedRecordings'
 
 # MIData = scipy.io.loadmat(f'{path}\\MIData.mat')['MIData']
 # print(MIData.shape)
