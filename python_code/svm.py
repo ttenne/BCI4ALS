@@ -1,6 +1,8 @@
 import scipy.io
 from sklearn import svm
 import numpy as np
+from AR import getARCoefs
+import matplotlib.pyplot as plt
 
 tag_dict = {
     3: 'idle ',
@@ -30,26 +32,47 @@ def printTable(mat):
             print(item, end="     ")
         print('')
 
-# path = 'C:\\Recordings\\Sub20220811003'
+def svmPredict(path, lags=20, print_table=False):
+    MIData = scipy.io.loadmat(f'{path}\\MIData.mat')['MIData']
+
+    y_train = scipy.io.loadmat(f'{path}\\LabelTrain.mat')['LabelTrain']
+    y_train = np.reshape(y_train, -1)
+    MIData_train = MIData[:len(y_train)]
+    ARCoefsTensor = getARCoefs(MIData_train, lags)
+    X_train = np.reshape(ARCoefsTensor, (ARCoefsTensor.shape[0],-1))
+
+    y_test = scipy.io.loadmat(f'{path}\\LabelTest.mat')['LabelTest']
+    y_test = np.reshape(y_test, -1)
+    MIData_test = MIData[len(y_train):]
+    ARCoefsTensor = getARCoefs(MIData_test, lags)
+    X_test = np.reshape(ARCoefsTensor, (ARCoefsTensor.shape[0],-1))
+
+    # print(X_train.shape)
+    # print(y_train.shape)
+    # print(X_test.shape)
+    # print(y_test.shape)
+    # exit()
+
+    clf = svm.SVC()
+    clf.fit(X_train, y_train)
+
+    y_pred = clf.predict(X_test)
+
+    return accuracy(y_test, y_pred)
+    # print(y_pred)
+    # print(y_test)
+    if print_table:
+        printTable(getResTable(y_test, y_pred))
+
 path = 'C:\\Users\\yaels\\Desktop\\UnitedRecordings'
+# svmPredict(path)
 
-X_train = scipy.io.loadmat(f'{path}\\FeaturesTrainSelected.mat')['FeaturesTrainSelected']
-y_train = scipy.io.loadmat(f'{path}\\LabelTrain.mat')['LabelTrain']
-y_train = np.reshape(y_train, -1)
-X_test = scipy.io.loadmat(f'{path}\\FeaturesTest.mat')['FeaturesTest']
-y_test = scipy.io.loadmat(f'{path}\\LabelTest.mat')['LabelTest']
-y_test = np.reshape(y_test, -1)
-# print(X_train.shape)
-# print(y_train.shape)
-# print(X_test.shape)
-# print(y_test.shape)
+accuracies = []
+max_lags = 1000
 
-clf = svm.SVC()
-clf.fit(X_train, y_train)
+for lags in range(max_lags):
+    print(f'Working on score for lags = {lags}...')
+    accuracies.append(svmPredict(path, lags, True))
 
-y_pred = clf.predict(X_test)
-
-print(f'Accuarcy = {accuracy(y_test, y_pred)}')
-# print(y_pred)
-# print(y_test)
-printTable(getResTable(y_test, y_pred))
+plt.plot(range(max_lags), accuracies)
+plt.show()

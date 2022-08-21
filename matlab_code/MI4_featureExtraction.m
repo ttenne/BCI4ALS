@@ -21,6 +21,7 @@ Features2Select = 10;                                           % number of feat
 numClasses = length(unique(targetLabels));                      % set number of possible targets (classes)
 Fs = 125;                                                       % openBCI Cyton+Daisy by Bluetooth sample rate
 trials = size(MIData,1);                                        % get number of trials from main data variable
+trialsForTest = 60;                                             % get number of trials for test set
 num4test = floor(0.2*trials/numClasses);                        % define how many test trials after feature extraction
 [R, C] = size(EEG_chans);                                       % get EEG_chans (char matrix) size - rows and columns
 chanLocs = reshape(EEG_chans',[1, R*C]);                        % reshape into a vector in the correct order
@@ -260,7 +261,7 @@ save(strcat(recordingFolder,'/AllDataInFeatures.mat'),'AllDataInFeatures');
 %testIdx = randperm(length(idleIdx),num4test);                       % picking test index randomly
 %testIdx = [idleIdx(testIdx) leftIdx(testIdx) rightIdx(testIdx)];    % taking the test index from each class
 %testIdx = sort(testIdx);                                            % sort the trials
-testIdx = 3*length(idleIdx)-(trials-1):3*length(idleIdx);                   % take only last session as testset
+testIdx = 3*length(idleIdx)-(trialsForTest-1):3*length(idleIdx);                   % take only last session as testset
 
 % split test data
 FeaturesTest = MIFeatures(testIdx,:,:);     % taking the test trials features from each class
