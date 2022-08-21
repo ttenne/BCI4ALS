@@ -54,7 +54,7 @@ end
 
 % visualize the CSP data:
 %vizTrial = 9;      % cherry-picked!
-for vizTrial = 1:20
+for vizTrial = 1:10
     figure;
     subplot(1,2,1)      % show a single trial before CSP seperation
     scatter3(squeeze(leftClass(vizTrial,1,:)),squeeze(leftClass(vizTrial,2,:)),squeeze(leftClass(vizTrial,3,:)),'b'); hold on

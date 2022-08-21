@@ -1,5 +1,5 @@
 function MI3_5_merge_data(recordingFolder, filtered_dir_names)
-numTrials = 60;
+numTrials = 30;
 
 %merge trainig vectors
 tempTrainingVec1 = load(strcat(char(filtered_dir_names(1)),'/trainingVec.mat'));

@@ -19,15 +19,15 @@ clc; clear; close all;
 %disp('Finished stimulation and EEG recording. Stop the LabRecorder and press any key to continue...');
 %pause;
 
-recordingsFolder = 'C:\Users\yaels\Desktop\Recordings\Junk\';
+recordingsFolder = 'C:\Users\yaels\Desktop\Recordings\';
 listdir = dir(recordingsFolder);
 dir_names = {listdir().name};
 for i = 1:length(dir_names)
     dir_names(i) = strcat(recordingsFolder, dir_names(i));
 end
 
-start_dir = strcat(recordingsFolder,'Sub20220818001');
-end_dir = strcat(recordingsFolder,'Sub20220818003');
+start_dir = strcat(recordingsFolder,'Sub20220821003');
+end_dir = strcat(recordingsFolder,'Sub20220821003');
 
 filtered_dir_names = {};
 should_append = false;
