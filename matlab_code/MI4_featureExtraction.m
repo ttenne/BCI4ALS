@@ -260,7 +260,7 @@ save(strcat(recordingFolder,'/AllDataInFeatures.mat'),'AllDataInFeatures');
 %testIdx = randperm(length(idleIdx),num4test);                       % picking test index randomly
 %testIdx = [idleIdx(testIdx) leftIdx(testIdx) rightIdx(testIdx)];    % taking the test index from each class
 %testIdx = sort(testIdx);                                            % sort the trials
-testIdx = 3*length(idleIdx)-59:3*length(idleIdx);                   % take only last session as testset
+testIdx = 3*length(idleIdx)-29:3*length(idleIdx);                   % take only last session as testset
 
 % split test data
 FeaturesTest = MIFeatures(testIdx,:,:);     % taking the test trials features from each class
