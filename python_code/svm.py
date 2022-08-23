@@ -32,7 +32,8 @@ def printTable(mat):
             print(item, end="     ")
         print('')
 
-def svmPredict(path, lags=20, print_table=False):
+def svmPredict(path, lags=21, print_table=False):
+    '''lags=21 based validation set Sub20220821001-Sub20220821003'''
     MIData = scipy.io.loadmat(f'{path}\\MIData.mat')['MIData']
 
     y_train = scipy.io.loadmat(f'{path}\\LabelTrain.mat')['LabelTrain']
@@ -58,21 +59,21 @@ def svmPredict(path, lags=20, print_table=False):
 
     y_pred = clf.predict(X_test)
 
-    return accuracy(y_test, y_pred)
     # print(y_pred)
     # print(y_test)
     if print_table:
         printTable(getResTable(y_test, y_pred))
+    return accuracy(y_test, y_pred)
 
 path = 'C:\\Users\\yaels\\Desktop\\UnitedRecordings'
-# svmPredict(path)
+print(svmPredict(path, print_table=True))
 
-accuracies = []
-max_lags = 1000
+# accuracies = []
+# max_lags = 100
 
-for lags in range(max_lags):
-    print(f'Working on score for lags = {lags}...')
-    accuracies.append(svmPredict(path, lags, True))
+# for lags in range(max_lags):
+#     print(f'Working on score for lags = {lags}...')
+#     accuracies.append(svmPredict(path, lags, True))
 
-plt.plot(range(max_lags), accuracies)
-plt.show()
+# plt.plot(range(max_lags), accuracies)
+# plt.show()
