@@ -2,6 +2,7 @@ import scipy.io
 from sklearn import svm
 import numpy as np
 from AR import getARCoefs
+from SampEn import getSampEnCoefs
 import matplotlib.pyplot as plt
 
 tag_dict = {
@@ -10,7 +11,9 @@ tag_dict = {
     2: 'right'
 }
 
-def accuracy(y_test, y_pred):
+def accuracy(y_test, y_pred, print_table=False):
+    if print_table:
+        printTable(getResTable(y_test, y_pred))
     return np.sum(y_test==y_pred)/y_test.shape[0]
 
 def getResTable(y_test, y_pred):
@@ -32,7 +35,7 @@ def printTable(mat):
             print(item, end="     ")
         print('')
 
-def svmPredict(path, lags=21, print_table=False):
+def svmPredict(path, lags=21):
     '''lags=21 based validation set Sub20220821001-Sub20220821003'''
     MIData = scipy.io.loadmat(f'{path}\\MIData.mat')['MIData']
 
@@ -41,12 +44,16 @@ def svmPredict(path, lags=21, print_table=False):
     MIData_train = MIData[:len(y_train)]
     ARCoefsTensor = getARCoefs(MIData_train, lags)
     X_train = np.reshape(ARCoefsTensor, (ARCoefsTensor.shape[0],-1)) #reshape data to a matrix in a shape of (num_of_trials, total_feat_number)
+    SampEnMat = getSampEnCoefs(MIData_train)
+    X_train = np.append(X_train, SampEnMat, axis=1)
 
     y_test = scipy.io.loadmat(f'{path}\\LabelTest.mat')['LabelTest']
     y_test = np.reshape(y_test, -1)
     MIData_test = MIData[len(y_train):]
     ARCoefsTensor = getARCoefs(MIData_test, lags)
     X_test = np.reshape(ARCoefsTensor, (ARCoefsTensor.shape[0],-1)) #reshape data to a matrix in a shape of (num_of_trials, total_feat_number)
+    SampEnMat = getSampEnCoefs(MIData_test)
+    X_test = np.append(X_test, SampEnMat, axis=1)
 
     # print(X_train.shape)
     # print(y_train.shape)
@@ -59,14 +66,12 @@ def svmPredict(path, lags=21, print_table=False):
 
     y_pred = clf.predict(X_test)
 
-    # print(y_pred)
-    # print(y_test)
-    if print_table:
-        printTable(getResTable(y_test, y_pred))
-    return accuracy(y_test, y_pred)
+    return y_pred, y_test
 
 path = 'C:\\Users\\yaels\\Desktop\\UnitedRecordings'
-print(svmPredict(path, print_table=True))
+y_pred, y_test = svmPredict(path)
+
+print(accuracy(y_test, y_pred, print_table=True))
 
 # accuracies = []
 # max_lags = 100

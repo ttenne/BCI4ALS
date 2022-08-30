@@ -10,14 +10,14 @@ def getSampEnCoefs(MIData):
             Samp, _, _ = SampEn(electrode)
             values_vec.append(Samp[-1])
         if len(values_mat) == 0:
-            values_mat = np.matrix(values_vec)
+            values_mat = np.asmatrix(values_vec)
         else:
-            values_vec = np.matrix(values_vec)
+            values_vec = np.asmatrix(values_vec)
             values_mat = np.append(values_mat, values_vec, axis=0)
     return values_mat
 
-import scipy.io
-path2 = 'C:\\Users\\yaels\\Desktop\\UnitedRecordings'
-MIData = scipy.io.loadmat(f'{path2}\\MIData.mat')['MIData']
+# import scipy.io
+# path2 = 'C:\\Users\\yaels\\Desktop\\UnitedRecordings'
+# MIData = scipy.io.loadmat(f'{path2}\\MIData.mat')['MIData']
 
-print(getSampEnCoefs(MIData).shape)
+# print(getSampEnCoefs(MIData).shape)

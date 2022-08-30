@@ -8,7 +8,7 @@ def getARCoefs(MIData, lags):
         coefs_mat = []
         for electrode in trial:
             model = AutoReg(electrode, lags=lags).fit()
-            coefs_vec = np.matrix(model.params)
+            coefs_vec = np.asmatrix(model.params)
             if len(coefs_mat) == 0:
                 coefs_mat = coefs_vec
             else:
