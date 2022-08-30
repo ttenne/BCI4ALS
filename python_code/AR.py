@@ -2,6 +2,7 @@ from statsmodels.tsa.ar_model import AutoReg
 import numpy as np
 
 def getARCoefs(MIData, lags):
+    '''return a tensor of AR coefficients in the shape of (num_of_trials, num_of_electrodes, num_of_lags+1)'''
     coefs_tensor = []
     for trial in MIData:
         coefs_mat = []
@@ -23,4 +24,4 @@ def getARCoefs(MIData, lags):
 # MIData = scipy.io.loadmat('C:\\Users\\yaels\\Desktop\\UnitedRecordings\\MIData.mat')['MIData']
 # # model = AutoReg(MIData[0][0], lags=10).fit()
 # # print(type(model.params))
-# print(getARCoefs(MIData).shape)
+# print(getARCoefs(MIData, 21).shape)

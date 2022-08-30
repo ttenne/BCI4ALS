@@ -40,13 +40,13 @@ def svmPredict(path, lags=21, print_table=False):
     y_train = np.reshape(y_train, -1)
     MIData_train = MIData[:len(y_train)]
     ARCoefsTensor = getARCoefs(MIData_train, lags)
-    X_train = np.reshape(ARCoefsTensor, (ARCoefsTensor.shape[0],-1))
+    X_train = np.reshape(ARCoefsTensor, (ARCoefsTensor.shape[0],-1)) #reshape data to a matrix in a shape of (num_of_trials, total_feat_number)
 
     y_test = scipy.io.loadmat(f'{path}\\LabelTest.mat')['LabelTest']
     y_test = np.reshape(y_test, -1)
     MIData_test = MIData[len(y_train):]
     ARCoefsTensor = getARCoefs(MIData_test, lags)
-    X_test = np.reshape(ARCoefsTensor, (ARCoefsTensor.shape[0],-1))
+    X_test = np.reshape(ARCoefsTensor, (ARCoefsTensor.shape[0],-1)) #reshape data to a matrix in a shape of (num_of_trials, total_feat_number)
 
     # print(X_train.shape)
     # print(y_train.shape)
