@@ -4,6 +4,7 @@ import numpy as np
 from AR import getARCoefs
 from SampEn import getSampEnCoefs
 import matplotlib.pyplot as plt
+from tabulate import tabulate
 
 tag_dict = {
     3: 'idle ',
@@ -13,7 +14,8 @@ tag_dict = {
 
 def accuracy(y_test, y_pred, print_table=False):
     if print_table:
-        printTable(getResTable(y_test, y_pred))
+        # printTable(getResTable(y_test, y_pred))
+        print(tabulate(getResTable(y_test, y_pred)))
     return np.sum(y_test==y_pred)/y_test.shape[0]
 
 def getResTable(y_test, y_pred):
@@ -28,12 +30,6 @@ def getResTable(y_test, y_pred):
             temp_res = y_test==real_res
             mat[real_res][pred_res] = sum([1 for i, result in enumerate(temp_res) if result and temp_pred[i]])/sum(y_test==real_res)
     return mat
-
-def printTable(mat):
-    for row in mat:
-        for item in row:
-            print(item, end="     ")
-        print('')
 
 def svmPredict(path='C:\\Users\\yaels\\Desktop\\UnitedRecordings', lags=21, lags_starting_point=300):
     '''lags=21 based validation set Sub20220821001-Sub20220821003'''
