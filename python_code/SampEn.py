@@ -10,10 +10,10 @@ def getSampEnCoefs(MIData):
             Samp, _, _ = SampEn(electrode)
             values_vec.append(Samp[-1])
         if len(values_mat) == 0:
-            values_mat = np.asmatrix(values_vec)
+            values_mat = np.asarray(values_vec)
         else:
-            values_vec = np.asmatrix(values_vec)
-            values_mat = np.append(values_mat, values_vec, axis=0)
+            values_vec = np.asarray(values_vec)
+            values_mat = np.vstack([values_mat, values_vec])
     return values_mat
 
 # import scipy.io

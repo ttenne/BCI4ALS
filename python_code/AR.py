@@ -12,11 +12,11 @@ def getARCoefs(MIData, lags, lags_starting_point):
             if lags_starting_point > 0:
                 electrode = electrode[:-lags_starting_point]
             model = AutoReg(electrode, lags=lags).fit()
-            coefs_vec = np.asmatrix(model.params)
+            coefs_vec = np.asarray(model.params)
             if len(coefs_mat) == 0:
                 coefs_mat = coefs_vec
             else:
-                coefs_mat = np.append(coefs_mat, coefs_vec, axis=0)
+                coefs_mat = np.vstack([coefs_mat, coefs_vec])
         coefs_mat = np.array([coefs_mat])
         if len(coefs_tensor) == 0:
             coefs_tensor = coefs_mat

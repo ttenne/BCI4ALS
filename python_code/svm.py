@@ -40,16 +40,16 @@ def svmPredict(path='C:\\Users\\yaels\\Desktop\\UnitedRecordings', lags=21, lags
     MIData_train = MIData[:len(y_train)]
     ARCoefsTensor = getARCoefs(MIData_train, lags, lags_starting_point)
     X_train = np.reshape(ARCoefsTensor, (ARCoefsTensor.shape[0],-1)) #reshape data to a matrix in a shape of (num_of_trials, total_feat_number)
-    # SampEnMat = getSampEnCoefs(MIData_train)
-    # X_train = np.append(X_train, SampEnMat, axis=1)
+    SampEnMat = getSampEnCoefs(MIData_train)
+    X_train = np.append(X_train, SampEnMat, axis=1)
 
     y_test = scipy.io.loadmat(f'{path}\\LabelTest.mat')['LabelTest']
     y_test = np.reshape(y_test, -1)
     MIData_test = MIData[len(y_train):]
     ARCoefsTensor = getARCoefs(MIData_test, lags, lags_starting_point)
     X_test = np.reshape(ARCoefsTensor, (ARCoefsTensor.shape[0],-1)) #reshape data to a matrix in a shape of (num_of_trials, total_feat_number)
-    # SampEnMat = getSampEnCoefs(MIData_test)
-    # X_test = np.append(X_test, SampEnMat, axis=1)
+    SampEnMat = getSampEnCoefs(MIData_test)
+    X_test = np.append(X_test, SampEnMat, axis=1)
 
     # print(X_train.shape)
     # print(y_train.shape)
