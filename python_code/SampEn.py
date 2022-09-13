@@ -15,9 +15,3 @@ def getSampEnCoefs(MIData):
             values_vec = np.asarray(values_vec)
             values_mat = np.vstack([values_mat, values_vec])
     return values_mat
-
-# import scipy.io
-# path2 = 'C:\\Users\\yaels\\Desktop\\UnitedRecordings'
-# MIData = scipy.io.loadmat(f'{path2}\\MIData.mat')['MIData']
-
-# print(getSampEnCoefs(MIData).shape)
