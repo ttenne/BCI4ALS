@@ -26,8 +26,8 @@ for i = 1:length(dir_names)
     dir_names(i) = strcat(recordingsFolder, dir_names(i));
 end
 
-start_dir = strcat(recordingsFolder,'Sub20220811002');
-end_dir = strcat(recordingsFolder,'Sub20220816004');
+start_dir = strcat(recordingsFolder,'Sub20220913001');
+end_dir = strcat(recordingsFolder,'Sub20220913002');
 
 filtered_dir_names = {};
 should_append = false;
@@ -49,11 +49,11 @@ for i = 1:length(filtered_dir_names)
     recordingFolder = char(filtered_dir_names(i));
     %% Run pre-processing pipeline on recorded data
     MI2_preprocess(recordingFolder);
-    disp('Finished pre-processing pipeline. Press any key to continue...');
+    disp('Finished pre-processing pipeline.');
     %pause;
     %% Segment data by trials
     MI3_segmentation(recordingFolder);
-    disp('Finished segmenting the data. Press any key to continue...');
+    disp('Finished segmenting the data');
     %pause;
 end
 
