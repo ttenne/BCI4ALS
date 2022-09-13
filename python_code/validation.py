@@ -41,7 +41,7 @@ def saveResultsInCsv(results, x, y):
         results = [np.insert(row, 0, y[i]) for i, row in enumerate(results)]
         writer.writerows(results)
 
-def validateAR(min_lags=18, max_lags=23, min_start_point=115, max_start_point=150):
+def validateAR(min_lags=15, max_lags=25, min_start_point=100, max_start_point=150):
     '''2-D validation for both hyper-parameters of the AR Model'''
     lags_numbers = list(range(min_lags, max_lags, 1))
     starting_points = list(range(min_start_point, max_start_point, 5))
@@ -70,6 +70,23 @@ def validateAR(min_lags=18, max_lags=23, min_start_point=115, max_start_point=15
     saveResultsInCsv(accuracies, lags_numbers, starting_points)
     plt.show()
 
-validateNumOfLags()
+def validateSampEn(min_r=0.1, max_r=0.25):
+    accuracies = []
+    r_vals = np.arange(min_r, max_r, 0.02)
+    for r_val in r_vals:
+        r_val = round(r_val,2)
+        print(f'Running r={r_val}')
+        y_pred, y_test = SVM.svmPredict(useSampEn=True, r_val=r_val)
+        accuracies.append(SVM.accuracy(y_test, y_pred))
+    plt.plot(r_vals, accuracies)
+    plt.xlabel('r values')
+    plt.ylabel('validation score')
+    plt.savefig('validateSampEn.png')
+    print(f'accuracies = {accuracies}')
+    print(f'max accuracy = {np.max(accuracies)}')
+    print(f'r value = {r_vals[np.argmax(accuracies)]}')
+
+# validateNumOfLags()
 # validateLagsStartingPoint()
 # validateAR()
+validateSampEn()

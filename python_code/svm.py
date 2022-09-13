@@ -30,7 +30,7 @@ def getResTable(y_test, y_pred):
             mat[real_res][pred_res] = sum([1 for i, result in enumerate(temp_res) if result and temp_pred[i]])/sum(y_test==real_res)
     return mat
 
-def svmPredict(path='C:\\Users\\yaels\\Desktop\\UnitedRecordings', lags=21, lags_starting_point=130, useSampEn=False):
+def svmPredict(path='C:\\Users\\yaels\\Desktop\\UnitedRecordings', lags=21, lags_starting_point=130, useSampEn=False, r_val=0.2):
     '''lags=21, lags_starting_point=130 based on validation set Sub20220821001-Sub20220821003'''
     MIData = scipy.io.loadmat(f'{path}\\MIData.mat')['MIData']
     #arrange train set
@@ -40,7 +40,7 @@ def svmPredict(path='C:\\Users\\yaels\\Desktop\\UnitedRecordings', lags=21, lags
     ARCoefsTensor = getARCoefs(MIData_train, lags, lags_starting_point)
     X_train = np.reshape(ARCoefsTensor, (ARCoefsTensor.shape[0],-1)) #reshape data to a matrix in a shape of (num_of_trials, total_feat_number)
     if useSampEn:
-        SampEnMat = getSampEnCoefs(MIData_train)
+        SampEnMat = getSampEnCoefs(MIData_train, r_val)
         X_train = np.append(X_train, SampEnMat, axis=1)
     #arrange test set
     y_test = scipy.io.loadmat(f'{path}\\LabelTest.mat')['LabelTest']
@@ -49,7 +49,7 @@ def svmPredict(path='C:\\Users\\yaels\\Desktop\\UnitedRecordings', lags=21, lags
     ARCoefsTensor = getARCoefs(MIData_test, lags, lags_starting_point)
     X_test = np.reshape(ARCoefsTensor, (ARCoefsTensor.shape[0],-1)) #reshape data to a matrix in a shape of (num_of_trials, total_feat_number)
     if useSampEn:
-        SampEnMat = getSampEnCoefs(MIData_test)
+        SampEnMat = getSampEnCoefs(MIData_test, r_val)
         X_test = np.append(X_test, SampEnMat, axis=1)
     #predict
     clf = svm.SVC()
