@@ -35,25 +35,25 @@ def printTable(mat):
             print(item, end="     ")
         print('')
 
-def svmPredict(path, lags=21):
+def svmPredict(path='C:\\Users\\yaels\\Desktop\\UnitedRecordings', lags=21, lags_starting_point=300):
     '''lags=21 based validation set Sub20220821001-Sub20220821003'''
     MIData = scipy.io.loadmat(f'{path}\\MIData.mat')['MIData']
 
     y_train = scipy.io.loadmat(f'{path}\\LabelTrain.mat')['LabelTrain']
     y_train = np.reshape(y_train, -1)
     MIData_train = MIData[:len(y_train)]
-    ARCoefsTensor = getARCoefs(MIData_train, lags)
+    ARCoefsTensor = getARCoefs(MIData_train, lags, lags_starting_point)
     X_train = np.reshape(ARCoefsTensor, (ARCoefsTensor.shape[0],-1)) #reshape data to a matrix in a shape of (num_of_trials, total_feat_number)
-    SampEnMat = getSampEnCoefs(MIData_train)
-    X_train = np.append(X_train, SampEnMat, axis=1)
+    # SampEnMat = getSampEnCoefs(MIData_train)
+    # X_train = np.append(X_train, SampEnMat, axis=1)
 
     y_test = scipy.io.loadmat(f'{path}\\LabelTest.mat')['LabelTest']
     y_test = np.reshape(y_test, -1)
     MIData_test = MIData[len(y_train):]
-    ARCoefsTensor = getARCoefs(MIData_test, lags)
+    ARCoefsTensor = getARCoefs(MIData_test, lags, lags_starting_point)
     X_test = np.reshape(ARCoefsTensor, (ARCoefsTensor.shape[0],-1)) #reshape data to a matrix in a shape of (num_of_trials, total_feat_number)
-    SampEnMat = getSampEnCoefs(MIData_test)
-    X_test = np.append(X_test, SampEnMat, axis=1)
+    # SampEnMat = getSampEnCoefs(MIData_test)
+    # X_test = np.append(X_test, SampEnMat, axis=1)
 
     # print(X_train.shape)
     # print(y_train.shape)
@@ -68,10 +68,9 @@ def svmPredict(path, lags=21):
 
     return y_pred, y_test
 
-path = 'C:\\Users\\yaels\\Desktop\\UnitedRecordings'
-y_pred, y_test = svmPredict(path)
-
-print(accuracy(y_test, y_pred, print_table=True))
+if __name__ == "__main__":
+    y_pred, y_test = svmPredict()
+    print(accuracy(y_test, y_pred, print_table=True))
 
 # accuracies = []
 # max_lags = 100
