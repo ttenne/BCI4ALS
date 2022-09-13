@@ -26,8 +26,8 @@ for i = 1:length(dir_names)
     dir_names(i) = strcat(recordingsFolder, dir_names(i));
 end
 
-start_dir = strcat(recordingsFolder,'Sub20220811002');
-end_dir = strcat(recordingsFolder,'Sub20220816004');
+start_dir = strcat(recordingsFolder,'Sub20220823001');
+end_dir = strcat(recordingsFolder,'Sub20220823003');
 
 filtered_dir_names = {};
 should_append = false;
@@ -49,10 +49,8 @@ recordingFolder ='C:\Users\yaels\Desktop\UnitedRecordings';
 
 %% Merge several sessions
 MI3_5_merge_data(recordingFolder, filtered_dir_names);
-disp('Finished merging the data. Press any key to continue...');
-pause;
+disp('Finished merging the data.');
 
 %% Extract features and labels
 MI4_trainTestSplit(recordingFolder);
-disp('Finished splitting the data. Press any key to continue...');
-pause;
+disp('Finished splitting the data.');
