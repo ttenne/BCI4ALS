@@ -3,6 +3,7 @@ from sklearn import svm
 import numpy as np
 from AR import getARCoefs
 from SampEn import getSampEnCoefs
+from ACSP import getACSPVars
 import matplotlib.pyplot as plt
 from tabulate import tabulate
 
@@ -30,7 +31,7 @@ def getResTable(y_test, y_pred):
             mat[real_res][pred_res] = sum([1 for i, result in enumerate(temp_res) if result and temp_pred[i]])/sum(y_test==real_res)
     return mat
 
-def svmPredict(path='C:\\Users\\yaels\\Desktop\\UnitedRecordings', lags=21, lags_starting_point=130, useSampEn=False, r_val=0.2):
+def svmPredict(path='C:\\Users\\yaels\\Desktop\\UnitedRecordings', lags=21, lags_starting_point=130, useSampEn=False, r_val=0.2, useACSP=False, initial_var_trial_num=30, mu=0.95):
     '''lags=21, lags_starting_point=130 based on validation set Sub20220821001-Sub20220821003'''
     MIData = scipy.io.loadmat(f'{path}\\MIData.mat')['MIData']
     #arrange train set
@@ -51,6 +52,10 @@ def svmPredict(path='C:\\Users\\yaels\\Desktop\\UnitedRecordings', lags=21, lags
     if useSampEn:
         SampEnMat = getSampEnCoefs(MIData_test, r_val)
         X_test = np.append(X_test, SampEnMat, axis=1)
+    if useACSP:
+        CSPVarsMat_train, CSPVarsMat_test = getACSPVars(MIData_train, MIData_test, y_train, initial_var_trial_num, mu)
+        X_train = np.append(X_train, CSPVarsMat_train, axis=1)
+        X_test = np.append(X_test, CSPVarsMat_test, axis=1)
     #predict
     clf = svm.SVC()
     clf.fit(X_train, y_train)

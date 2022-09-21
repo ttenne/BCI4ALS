@@ -86,7 +86,30 @@ def validateSampEn(min_r=0.1, max_r=0.25):
     print(f'max accuracy = {np.max(accuracies)}')
     print(f'r value = {r_vals[np.argmax(accuracies)]}')
 
+def validateACSPInitialTrialNum(min_num=10, max_num=55, min_mu=0.5, max_mu=1.05):
+    '''2-D validation for both hyper-parameters of the ACSP algo'''
+    trial_numbers = list(range(min_num, max_num, 5))
+    mus = np.arange(min_mu, max_mu, 0.05)
+    accuracies = np.zeros((len(mus),len(trial_numbers)))
+    for i, mu in enumerate(mus):
+        mu = round(mu,2)
+        for j, num in enumerate(trial_numbers):
+            print(f'Running mu={mu}, trial_num={num}')
+            y_pred, y_test = SVM.svmPredict(useACSP=True, initial_var_trial_num=num, mu=mu)
+            accuracies[i][j] = SVM.accuracy(y_test, y_pred)
+    print(accuracies)
+    fig, ax = plt.subplots(subplot_kw={"projection": "3d"})
+    X, Y = np.meshgrid(trial_numbers, mus)
+    surf = ax.plot_surface(X, Y, accuracies, cmap=cm.coolwarm, linewidth=0, antialiased=False)
+    fig.colorbar(surf, shrink=0.5, aspect=5)
+    ax.set_xlabel('trial numbers')
+    ax.set_ylabel('mu')
+    ax.set_zlabel('accuracy')
+    saveResultsInCsv(accuracies, trial_numbers, mus)
+    plt.show()
+
 # validateNumOfLags()
 # validateLagsStartingPoint()
 # validateAR()
-validateSampEn()
+# validateSampEn()
+validateACSPInitialTrialNum()
