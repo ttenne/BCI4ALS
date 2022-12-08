@@ -31,31 +31,47 @@ def getResTable(y_test, y_pred):
             mat[real_res][pred_res] = sum([1 for i, result in enumerate(temp_res) if result and temp_pred[i]])/sum(y_test==real_res)
     return mat
 
-def svmPredict(path='C:\\Users\\yaels\\Desktop\\UnitedRecordings', lags=21, lags_starting_point=130, useSampEn=False, r_val=0.2, useACSP=False, initial_var_trial_num=30, mu=0.95):
+def reshapeFeatures(features):
+    if len(features.shape) == 3:
+        return np.reshape(features, (features.shape[0],-1))
+    elif len(features.shape) == 2:
+        return features
+    else:
+        raise ValueError('Invalid dimenstion of feature tensor')
+
+def addFeatures(oldFeatures, newFeatures):
+    if len(oldFeatures) == 0:
+        return reshapeFeatures(newFeatures)
+    else:
+        return np.append(oldFeatures, reshapeFeatures(newFeatures), axis=1)
+
+def svmPredict(path='C:\\Users\\yaels\\Desktop\\UnitedRecordings', lags=21, lags_starting_point=130, useAR=True, useSampEn=False, r_val=0.2, useACSP=False, initial_var_trial_num=30, mu=0.95):
     '''lags=21, lags_starting_point=130 based on validation set Sub20220821001-Sub20220821003'''
+    #fetch data
     MIData = scipy.io.loadmat(f'{path}\\MIData.mat')['MIData']
-    #arrange train set
     y_train = scipy.io.loadmat(f'{path}\\LabelTrain.mat')['LabelTrain']
     y_train = np.reshape(y_train, -1)
     MIData_train = MIData[:len(y_train)]
-    ARCoefsTensor = getARCoefs(MIData_train, lags, lags_starting_point)
-    X_train = np.reshape(ARCoefsTensor, (ARCoefsTensor.shape[0],-1)) #reshape data to a matrix in a shape of (num_of_trials, total_feat_number)
-    if useSampEn:
-        SampEnMat = getSampEnCoefs(MIData_train, r_val)
-        X_train = np.append(X_train, SampEnMat, axis=1)
-    #arrange test set
     y_test = scipy.io.loadmat(f'{path}\\LabelTest.mat')['LabelTest']
     y_test = np.reshape(y_test, -1)
     MIData_test = MIData[len(y_train):]
-    ARCoefsTensor = getARCoefs(MIData_test, lags, lags_starting_point)
-    X_test = np.reshape(ARCoefsTensor, (ARCoefsTensor.shape[0],-1)) #reshape data to a matrix in a shape of (num_of_trials, total_feat_number)
+    #arrange train and test set
+    X_train = []
+    X_test = []
+    if useAR:
+        ARCoefsTensor = getARCoefs(MIData_train, lags, lags_starting_point)
+        X_train = addFeatures(X_train, ARCoefsTensor)
+        ARCoefsTensor = getARCoefs(MIData_test, lags, lags_starting_point)
+        X_test = addFeatures(X_test, ARCoefsTensor)
     if useSampEn:
+        SampEnMat = getSampEnCoefs(MIData_train, r_val)
+        X_train = addFeatures(X_train, SampEnMat)
         SampEnMat = getSampEnCoefs(MIData_test, r_val)
-        X_test = np.append(X_test, SampEnMat, axis=1)
+        X_test = addFeatures(X_test, SampEnMat)
     if useACSP:
         CSPVarsMat_train, CSPVarsMat_test = getACSPVars(MIData_train, MIData_test, y_train, initial_var_trial_num, mu)
-        X_train = np.append(X_train, CSPVarsMat_train, axis=1)
-        X_test = np.append(X_test, CSPVarsMat_test, axis=1)
+        X_train = addFeatures(X_test, CSPVarsMat_train)
+        X_test = addFeatures(X_test, CSPVarsMat_test)
     #predict
     clf = svm.SVC()
     clf.fit(X_train, y_train)
