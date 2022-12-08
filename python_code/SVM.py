@@ -75,7 +75,7 @@ def svmPredict(path='C:\\Users\\yaels\\Desktop\\UnitedRecordings', lags=21, lags
         X_test = addFeatures(X_test, SampEnMat)
     if useACSP:
         CSPVarsMat_train, CSPVarsMat_test = getACSPVars(MIData_train, MIData_test, y_train, initial_var_trial_num, mu)
-        X_train = addFeatures(X_test, CSPVarsMat_train)
+        X_train = addFeatures(X_train, CSPVarsMat_train)
         X_test = addFeatures(X_test, CSPVarsMat_test)
     #predict
     clf = svm.SVC()
