@@ -15,38 +15,45 @@ def calcCovMat(MIData):
 def updateCovMat(cov_mat, trial, mu):
     return mu*cov_mat + (1-mu)*np.matmul(trial, trial.T)
 
-def applyCSPFilters(MIData_test, filter1):
-    for i in range(len(MIData_test)):
-        MIData_test[i] = np.matmul(filter1.T, MIData_test[i])
-    return MIData_test
+# def applyCSPFilters(MIData_test, filter1):
+#     for i in range(len(MIData_test)):
+#         MIData_test[i] = np.matmul(filter1.T, MIData_test[i])
+#     return MIData_test
 
-def ACSP_OVR(MIData_train, y_train, initial_var_trial_num, mu):
-    MIData_train1 = MIData_train[:initial_var_trial_num]
-    y_train1 = y_train[:initial_var_trial_num]
-    MIData_train2 = MIData_train[initial_var_trial_num:]
-    y_train2 = y_train[initial_var_trial_num:]
-    cov1 = calcCovMat(MIData_train1[y_train1==1])
-    cov1_rest = calcCovMat(MIData_train[y_train!=1])
-    cov2 = calcCovMat(MIData_train1[y_train1==2])
-    cov2_rest = calcCovMat(MIData_train[y_train!=2])
-    cov3 = calcCovMat(MIData_train[y_train==3])
-    cov3_rest = calcCovMat(MIData_train[y_train!=3])
-    for i, trial in enumerate(MIData_train2):
-        if y_train2[i] == 1:
-            cov1 = updateCovMat(cov1, trial, mu)
-        elif y_train2[i] == 2:
-            cov2 = updateCovMat(cov2, trial, mu)
-        elif y_train2[i] == 3:
-            cov3 = updateCovMat(cov3, trial, mu)
-    filter1 = getCSPFilters(cov1, cov1_rest)
-    filter2 = getCSPFilters(cov2, cov2_rest)
-    filter3 = getCSPFilters(cov3, cov3_rest)
-    return filter1, filter2, filter3
+def applyCSPFilter(MIData_trial, filter1):
+    return np.matmul(filter1.T, MIData_trial)
+
+def ACSP_OVR_init(MIData_train, y_train, initial_var_trial_num, num_of_classes=3):
+    MIData_train_init = MIData_train[:initial_var_trial_num]
+    y_train_init = y_train[:initial_var_trial_num]
+    cov_mat_list = [calcCovMat(MIData_train_init[y_train_init==i]) for i in range(1,1+num_of_classes)]
+    cov_rest_mat_list = [calcCovMat(MIData_train_init[y_train_init!=i]) for i in range(1,1+num_of_classes)]
+    filter_list = [getCSPFilters(cov_mat_list[i], cov_rest_mat_list[i]) for i in range(num_of_classes)]
+    return filter_list, cov_mat_list, cov_rest_mat_list
+
+def ACSP_OVR_update(MIData_train_trial, y_train_trial, mu, filter_list, cov_mat_list, cov_rest_mat_list):
+    cov_mat_list[y_train_trial-1] = updateCovMat(cov_mat_list[y_train_trial-1], MIData_train_trial, mu)
+    cov_rest_mat_list = [updateCovMat(cov_rest_mat, MIData_train_trial, mu) if i != y_train_trial-1 else cov_rest_mat for i, cov_rest_mat in enumerate(cov_rest_mat_list)]
+    filter_list = [getCSPFilters(cov_mat_list[i], cov_rest_mat_list[i]) for i in range(len(filter_list))]
+    return filter_list, cov_mat_list, cov_rest_mat_list
+
+def ACSP_OVR(MIData_train, y_train, MIData_test, initial_var_trial_num, mu):
+    filter_list, cov_mat_list, cov_rest_mat_list = ACSP_OVR_init(MIData_train, y_train, initial_var_trial_num)
+    MIData_train_after_csp = [[] for i in range(len(filter_list))]
+    MIData_test_after_csp = [[] for i in range(len(filter_list))]
+    for trial, MIData_train_trial in enumerate(MIData_train):
+        if trial >= initial_var_trial_num:
+            filter_list, cov_mat_list, cov_rest_mat_list = ACSP_OVR_update(MIData_train_trial, y_train[trial], mu, filter_list, cov_mat_list, cov_rest_mat_list)
+        for i, filter1 in enumerate(filter_list):
+            MIData_train_after_csp[i].append(applyCSPFilter(MIData_train_trial, filter1))
+    for trial, MIData_test_trial in enumerate(MIData_test):
+        filter_list, cov_mat_list, cov_rest_mat_list = ACSP_OVR_update(MIData_train_trial, y_train[trial], mu, filter_list, cov_mat_list, cov_rest_mat_list)
+        for i, filter1 in enumerate(filter_list):
+                MIData_test_after_csp[i].append(applyCSPFilter(MIData_test_trial, filter1))
+    return MIData_train_after_csp, MIData_test_after_csp
 
 def getACSPVars(MIData_train, MIData_test, y_train, initial_var_trial_num, mu):
-    filters = ACSP_OVR(MIData_train, y_train, initial_var_trial_num, mu)
-    MIData_train_after_csp = [applyCSPFilters(MIData_train, filter) for filter in filters]
-    MIData_test_after_csp = [applyCSPFilters(MIData_test, filter) for filter in filters]
+    MIData_train_after_csp, MIData_test_after_csp = ACSP_OVR(MIData_train, y_train, MIData_test, initial_var_trial_num, mu)
     CSPVarsMat_train = []
     for proj in MIData_train_after_csp:
         proj_mat = []
