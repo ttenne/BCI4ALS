@@ -45,7 +45,7 @@ def addFeatures(oldFeatures, newFeatures):
     else:
         return np.append(oldFeatures, reshapeFeatures(newFeatures), axis=1)
 
-def svmPredict(path='C:\\Users\\yaels\\Desktop\\UnitedRecordings', lags=21, lags_starting_point=130, useBS=False, useAR=True, useSampEn=False, r_val=0.2, useACSP=False, initial_var_trial_num=30, mu=0.95):
+def svmPredict(path='C:\\Users\\yaels\\Desktop\\UnitedRecordings', lags=21, lags_starting_point=130, useBS=False, useAR=False, useSampEn=False, r_val=0.2, useACSP=False, initial_var_trial_num=20, mu=0.95):
     '''lags=21, lags_starting_point=130 based on validation set Sub20220821001-Sub20220821003'''
     #fetch data
     MIData = scipy.io.loadmat(f'{path}\\MIData.mat')['MIData']

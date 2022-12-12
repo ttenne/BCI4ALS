@@ -9,7 +9,7 @@ def validateNumOfLags(min_lags=15, max_lags=25):
     lags_numbers = list(range(min_lags, max_lags, 1))
     for lags in lags_numbers:
         print(f'Running lags={lags}')
-        y_pred, y_test = SVM.svmPredict(lags=lags)
+        y_pred, y_test = SVM.svmPredict(useAR=True, lags=lags)
         accuracies.append(SVM.accuracy(y_test, y_pred))
     plt.plot(lags_numbers, accuracies)
     plt.xlabel('# of lags')
@@ -24,7 +24,7 @@ def validateLagsStartingPoint(min_start_point=100, max_start_point=150):
     starting_points = list(range(min_start_point, max_start_point, 5))
     for start in starting_points:
         print(f'Running start={start}')
-        y_pred, y_test = SVM.svmPredict(lags_starting_point=start)
+        y_pred, y_test = SVM.svmPredict(useAR=True, lags_starting_point=start)
         accuracies.append(SVM.accuracy(y_test, y_pred))
     plt.plot(starting_points, accuracies)
     plt.xlabel('starting point')
@@ -34,8 +34,8 @@ def validateLagsStartingPoint(min_start_point=100, max_start_point=150):
     print(f'max accuracy = {np.max(accuracies)}')
     print(f'starting point = {starting_points[np.argmax(accuracies)]}')
 
-def saveResultsInCsv(results, x, y):
-    with open('validateAR.csv', mode='w') as fp:
+def saveResultsInCsv(results, x, y, file_name):
+    with open(f'validatation_{file_name}.csv', mode='w') as fp:
         writer = csv.writer(fp, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
         writer.writerow(['']+x)
         results = [np.insert(row, 0, y[i]) for i, row in enumerate(results)]
@@ -50,7 +50,7 @@ def validateAR(min_lags=15, max_lags=25, min_start_point=100, max_start_point=15
         for j, lags in enumerate(lags_numbers):
             print(f'Running start={start}, lags={lags}')
             try:
-                y_pred, y_test = SVM.svmPredict(lags=lags, lags_starting_point=start)
+                y_pred, y_test = SVM.svmPredict(useAR=True, lags=lags, lags_starting_point=start)
             except ZeroDivisionError:
                 #this means we got to the maximal lags number for current starting point
                 break
@@ -67,7 +67,7 @@ def validateAR(min_lags=15, max_lags=25, min_start_point=100, max_start_point=15
     ax.set_xlabel('lags')
     ax.set_ylabel('starting point')
     ax.set_zlabel('accuracy')
-    saveResultsInCsv(accuracies, lags_numbers, starting_points)
+    saveResultsInCsv(accuracies, lags_numbers, starting_points, 'AR')
     plt.show()
 
 def validateSampEn(min_r=0.1, max_r=0.25):
@@ -86,7 +86,7 @@ def validateSampEn(min_r=0.1, max_r=0.25):
     print(f'max accuracy = {np.max(accuracies)}')
     print(f'r value = {r_vals[np.argmax(accuracies)]}')
 
-def validateACSPInitialTrialNum(min_num=10, max_num=55, min_mu=0.5, max_mu=1.05):
+def validateACSP(min_num=10, max_num=55, min_mu=0.5, max_mu=1.05):
     '''2-D validation for both hyper-parameters of the ACSP algo'''
     trial_numbers = list(range(min_num, max_num, 5))
     mus = np.arange(min_mu, max_mu, 0.05)
@@ -105,5 +105,5 @@ def validateACSPInitialTrialNum(min_num=10, max_num=55, min_mu=0.5, max_mu=1.05)
     ax.set_xlabel('trial numbers')
     ax.set_ylabel('mu')
     ax.set_zlabel('accuracy')
-    saveResultsInCsv(accuracies, trial_numbers, mus)
+    saveResultsInCsv(accuracies, trial_numbers, mus, 'ACSP')
     plt.show()
