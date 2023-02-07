@@ -6,6 +6,7 @@ from SampEn import getSampEnCoefs
 from ACSP import getACSPVars
 import matplotlib.pyplot as plt
 from tabulate import tabulate
+from sklearn.feature_selection import mutual_info_classif
 
 tag_dict = {
     3: 'idle ',
@@ -45,7 +46,7 @@ def addFeatures(oldFeatures, newFeatures):
     else:
         return np.append(oldFeatures, reshapeFeatures(newFeatures), axis=1)
 
-def svmPredict(path='C:\\Users\\yaels\\Desktop\\UnitedRecordings', lags=21, lags_starting_point=130, useBS=False, useAR=False, useSampEn=False, r_val=0.2, useACSP=False, initial_var_trial_num=20, mu=0.95):
+def svmPredict(path='C:\\Users\\yaels\\Desktop\\UnitedRecordings', lags=21, lags_starting_point=130, useBS=True, useAR=True, useSampEn=True, r_val=0.2, useACSP=True, initial_var_trial_num=20, mu=0.95, num_of_selected_features = 11):
     '''lags=21, lags_starting_point=130 based on validation set Sub20220821001-Sub20220821003'''
     #fetch data
     MIData = scipy.io.loadmat(f'{path}\\MIData.mat')['MIData']
@@ -77,6 +78,11 @@ def svmPredict(path='C:\\Users\\yaels\\Desktop\\UnitedRecordings', lags=21, lags
         CSPVarsMat_train, CSPVarsMat_test = getACSPVars(MIData_train, MIData_test, y_train, initial_var_trial_num, mu)
         X_train = addFeatures(X_train, CSPVarsMat_train)
         X_test = addFeatures(X_test, CSPVarsMat_test)
+    #apply feature selection
+    MI_values = mutual_info_classif(X_train, y_train)
+    selected_features = sorted(range(len(MI_values)), key = lambda sub: MI_values[sub])[-num_of_selected_features:]
+    X_train = X_train[:, selected_features]
+    X_test = X_test[:, selected_features]
     #predict
     clf = svm.SVC()
     clf.fit(X_train, y_train)
@@ -84,5 +90,5 @@ def svmPredict(path='C:\\Users\\yaels\\Desktop\\UnitedRecordings', lags=21, lags
     return y_pred, y_test
 
 if __name__ == "__main__":
-    y_pred, y_test = svmPredict()
+    y_pred, y_test = svmPredict(useBS=True, useAR=True, useSampEn=True, useACSP=True)
     print(f'accuracy = {accuracy(y_test, y_pred, print_table=True)}')
