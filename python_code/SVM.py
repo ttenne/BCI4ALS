@@ -7,6 +7,7 @@ from ACSP import getACSPVars
 import matplotlib.pyplot as plt
 from tabulate import tabulate
 from sklearn.feature_selection import mutual_info_classif
+from AutoEnc import denoise
 
 tag_dict = {
     3: 'idle ',
@@ -71,10 +72,12 @@ def printSelectedFeatures(selected_features):
     print(f'SampEn_count = {SampEn_count}')
     print(f'ACSP_count = {ACSP_count}')
 
-def svmPredict(path='C:\\Users\\yaels\\Desktop\\UnitedRecordings', lags=21, lags_starting_point=130, useBS=True, useAR=True, useSampEn=True, r_val=0.2, useACSP=True, initial_var_trial_num=20, mu=0.95, useFeatSelAlg=True, num_of_selected_features=250, print_selected_features=False):
+def svmPredict(path='C:\\Users\\yaels\\Desktop\\UnitedRecordings', lags=21, lags_starting_point=130, useBS=True, useAR=True, useSampEn=True, r_val=0.2, useACSP=True, initial_var_trial_num=20, mu=0.95, useFeatSelAlg=True, num_of_selected_features=250, print_selected_features=False, useAutoEnc=True):
     '''lags=21, lags_starting_point=130 based on validation set Sub20220821001-Sub20220821003'''
     #fetch data
     MIData = scipy.io.loadmat(f'{path}\\MIData.mat')['MIData']
+    if useAutoEnc:
+        MIData = denoise(MIData)
     y_train = scipy.io.loadmat(f'{path}\\LabelTrain.mat')['LabelTrain']
     y_train = np.reshape(y_train, -1)
     MIData_train = MIData[:len(y_train)]
@@ -141,5 +144,5 @@ def svmPredict(path='C:\\Users\\yaels\\Desktop\\UnitedRecordings', lags=21, lags
     return y_pred, y_test
 
 if __name__ == "__main__":
-    y_pred, y_test = svmPredict(useBS=True, useAR=True, useSampEn=False, useACSP=False, useFeatSelAlg=False, num_of_selected_features=50, print_selected_features=True)
+    y_pred, y_test = svmPredict(useBS=True, useAR=True, useSampEn=False, useACSP=False, useFeatSelAlg=False, num_of_selected_features=50, print_selected_features=True, useAutoEnc=True)
     print(f'accuracy = {accuracy(y_test, y_pred, print_table=True)}')
