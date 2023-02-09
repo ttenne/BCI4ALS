@@ -1,3 +1,4 @@
+function [] = MainScript_ultraLight_BSFeatures(recordingsFolder, start_dir, end_dir)
 %% MI Offline Main Script
 % This script runs all the steps in order. Training -- Pre-processing --
 % Data segmentation -- Feature extraction -- Model training.
@@ -11,23 +12,20 @@
 % (harelasa@post.bgu.ac.il) in 2021. You are free to use, change, adapt and
 % so on - but please cite properly if published.
 
-
-clc; clear; close all;
-
 %% Run stimulation and record EEG data
 %[recordingFolder] = MI1_offline_training();
 %disp('Finished stimulation and EEG recording. Stop the LabRecorder and press any key to continue...');
 %pause;
 
-recordingsFolder = 'C:\Users\yaels\Desktop\Recordings\';
+%recordingsFolder = 'C:\Users\yaels\Desktop\Recordings\';
 listdir = dir(recordingsFolder);
 dir_names = {listdir().name};
 for i = 1:length(dir_names)
     dir_names(i) = strcat(recordingsFolder, dir_names(i));
 end
 
-start_dir = strcat(recordingsFolder,'Sub20220821001');
-end_dir = strcat(recordingsFolder,'Sub20220821003');
+%start_dir = strcat(recordingsFolder,'Sub20220821001');
+%end_dir = strcat(recordingsFolder,'Sub20220821003');
 
 filtered_dir_names = {};
 should_append = false;

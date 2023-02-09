@@ -1,3 +1,4 @@
+function [] = MainScript_lightRandom(recordingsFolder, start_dir, end_dir)
 %% MI Offline Main Script
 % This script runs all the steps in order. Training -- Pre-processing --
 % Data segmentation -- Feature extraction -- Model training.
@@ -11,23 +12,20 @@
 % (harelasa@post.bgu.ac.il) in 2021. You are free to use, change, adapt and
 % so on - but please cite properly if published.
 
-
-clc; clear; close all;
-
 %% Run stimulation and record EEG data
 %[recordingFolder] = MI1_offline_training();
 %disp('Finished stimulation and EEG recording. Stop the LabRecorder and press any key to continue...');
 %pause;
 
-recordingsFolder = 'C:\Users\yaels\Desktop\Recordings\';
+%recordingsFolder = 'C:\Users\yaels\Desktop\Recordings\';
 listdir = dir(recordingsFolder);
 dir_names = {listdir().name};
 for i = 1:length(dir_names)
     dir_names(i) = strcat(recordingsFolder, dir_names(i));
 end
 
-start_dir = strcat(recordingsFolder,'Sub20230207001');
-end_dir = strcat(recordingsFolder,'Sub20230207003');
+%start_dir = strcat(recordingsFolder,'Sub20230207001');
+%end_dir = strcat(recordingsFolder,'Sub20230207003');
 
 filtered_dir_names = {};
 should_append = false;
@@ -53,7 +51,7 @@ for i = 1:length(filtered_dir_names)
     %pause;
     %% Segment data by trials
     MI3_segmentation(recordingFolder);
-    disp('Finished segmenting the data');
+    disp('Finished segmenting the data.');
     %pause;
 end
 
@@ -61,10 +59,10 @@ recordingFolder ='C:\Users\yaels\Desktop\UnitedRecordings';
 
 %% Merge several sessions
 MI3_5_merge_data(recordingFolder, filtered_dir_names);
-disp('Finished merging the data. Press any key to continue...');
-pause;
+disp('Finished merging the data.');
+%pause;
 
 %% Extract features and labels
 MI4_trainTestSplitRandom(recordingFolder);
-disp('Finished splitting the data. Press any key to continue...');
-pause;
+disp('Finished splitting the data.');
+%pause;
