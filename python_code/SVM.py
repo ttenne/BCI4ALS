@@ -7,7 +7,7 @@ from ACSP import getACSPVars
 import matplotlib.pyplot as plt
 from tabulate import tabulate
 from sklearn.feature_selection import mutual_info_classif
-from AutoEnc import denoise
+from AutoEnc import AutoEncoder
 
 tag_dict = {
     3: 'idle ',
@@ -47,11 +47,15 @@ def addFeatures(oldFeatures, newFeatures):
     else:
         return np.append(oldFeatures, reshapeFeatures(newFeatures), axis=1)
 
-def printSelectedFeatures(selected_features):
-    BS_indices = list(range(10))
-    AR_indices = list(range(10,252))
-    SampEn_indices = list(range(252,263))
-    ACSP_indices = list(range(263,296))
+def printSelectedFeatures(selected_features, useBS, useAR, useSampEn, useACSP):
+    cur_index = 0
+    BS_indices = list(range(cur_index, 10 if useBS else 0))
+    cur_index += len(BS_indices)
+    AR_indices = list(range(cur_index, cur_index + 242 if useAR else cur_index))
+    cur_index += len(AR_indices)
+    SampEn_indices = list(range(cur_index, cur_index + 11 if useSampEn else cur_index))
+    cur_index += len(SampEn_indices)
+    ACSP_indices = list(range(cur_index, cur_index + 33 if useACSP else cur_index))
     BS_count = 0
     AR_count = 0
     SampEn_count = 0
@@ -67,47 +71,61 @@ def printSelectedFeatures(selected_features):
             ACSP_count += 1
         else:
             raise ValueError()
-    print(f'BS_count = {BS_count}')
-    print(f'AR_count = {AR_count}')
-    print(f'SampEn_count = {SampEn_count}')
-    print(f'ACSP_count = {ACSP_count}')
+    if useBS:
+        print(f'BS_count = {BS_count}')
+    if useAR:
+        print(f'AR_count = {AR_count}')
+    if useSampEn:
+        print(f'SampEn_count = {SampEn_count}')
+    if useACSP:
+        print(f'ACSP_count = {ACSP_count}')
 
 def svmPredict(path='C:\\Users\\yaels\\Desktop\\UnitedRecordings', lags=21, lags_starting_point=130, useBS=True, useAR=True, useSampEn=True, r_val=0.2, useACSP=True, initial_var_trial_num=20, mu=0.95, useFeatSelAlg=True, num_of_selected_features=250, print_selected_features=False, useAutoEnc=True):
     '''lags=21, lags_starting_point=130 based on validation set Sub20220821001-Sub20220821003'''
     #fetch data
+    print('Fetching MIData...')
     MIData = scipy.io.loadmat(f'{path}\\MIData.mat')['MIData']
-    if useAutoEnc:
-        MIData = denoise(MIData)
     y_train = scipy.io.loadmat(f'{path}\\LabelTrain.mat')['LabelTrain']
     y_train = np.reshape(y_train, -1)
     MIData_train = MIData[:len(y_train)]
     y_test = scipy.io.loadmat(f'{path}\\LabelTest.mat')['LabelTest']
     y_test = np.reshape(y_test, -1)
     MIData_test = MIData[len(y_train):]
+    if useAutoEnc:
+        print('Creating auto-encoder CNN...')
+        auto_encoder = AutoEncoder(MIData_train)#, epochs=10)
+        print('Filtering MIData...')
+        MIData_train = auto_encoder.predict(MIData_train)
+        MIData_test = auto_encoder.predict(MIData_test)
     #arrange train and test set
     X_train = []
     X_test = []
     if useBS:
+        print('Extracting BS features...')
         BSFeatures = scipy.io.loadmat(f'{path}\\FeaturesTrainSelected.mat')['FeaturesTrainSelected']
         X_train = addFeatures(X_train, BSFeatures)
         BSFeatures = scipy.io.loadmat(f'{path}\\FeaturesTest.mat')['FeaturesTest']
         X_test = addFeatures(X_test, BSFeatures)
     if useAR:
+        print('Extracting AR features...')
         ARCoefsTensor = getARCoefs(MIData_train, lags, lags_starting_point)
         X_train = addFeatures(X_train, ARCoefsTensor)
         ARCoefsTensor = getARCoefs(MIData_test, lags, lags_starting_point)
         X_test = addFeatures(X_test, ARCoefsTensor)
     if useSampEn:
+        print('Extracting SampEn features...')
         SampEnMat = getSampEnCoefs(MIData_train, r_val)
         X_train = addFeatures(X_train, SampEnMat)
         SampEnMat = getSampEnCoefs(MIData_test, r_val)
         X_test = addFeatures(X_test, SampEnMat)
     if useACSP:
+        print('Extracting ACSP features...')
         CSPVarsMat_train, CSPVarsMat_test = getACSPVars(MIData_train, MIData_test, y_train, initial_var_trial_num, mu)
         X_train = addFeatures(X_train, CSPVarsMat_train)
         X_test = addFeatures(X_test, CSPVarsMat_test)
     #apply feature selection
     if useFeatSelAlg:
+        print('Executing feature selection...')
         MI_values = mutual_info_classif(X_train, y_train)
         # validate number of selected features - this is here and not in the validation.py file, because we want to reuse the exact same features for each iteration so using the svmPredict function every time is a huge waste of time
         # accuracies = []
@@ -131,7 +149,7 @@ def svmPredict(path='C:\\Users\\yaels\\Desktop\\UnitedRecordings', lags=21, lags
         # exit()
         selected_features = sorted(range(len(MI_values)), key = lambda sub: MI_values[sub])[-num_of_selected_features:] #extract num_of_selected_features features with best MI value
         if print_selected_features:
-            printSelectedFeatures(selected_features)
+            printSelectedFeatures(selected_features, useBS, useAR, useSampEn, useACSP)
         X_train_selected = X_train[:, selected_features]
         X_test_selected = X_test[:, selected_features]
     else:
@@ -139,10 +157,12 @@ def svmPredict(path='C:\\Users\\yaels\\Desktop\\UnitedRecordings', lags=21, lags
         X_test_selected = X_test
     #predict
     clf = svm.SVC()
+    print('Training SVM...')
     clf.fit(X_train_selected, y_train)
+    print('Executing classification...')
     y_pred = clf.predict(X_test_selected)
     return y_pred, y_test
 
 if __name__ == "__main__":
-    y_pred, y_test = svmPredict(useBS=True, useAR=True, useSampEn=False, useACSP=False, useFeatSelAlg=False, num_of_selected_features=50, print_selected_features=True, useAutoEnc=True)
+    y_pred, y_test = svmPredict(useBS=True, useAR=True, useSampEn=False, useACSP=False, useFeatSelAlg=True, num_of_selected_features=66, print_selected_features=True, useAutoEnc=True)
     print(f'accuracy = {accuracy(y_test, y_pred, print_table=True)}')
