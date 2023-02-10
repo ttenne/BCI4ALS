@@ -1,11 +1,11 @@
-function [] = MI4_trainTestSplit(recordingFolder)
+function [] = MI4_trainTestSplit(recordingFolder, trialsForTest)
 %% This function makes the train-test split
 
 %% Load previous variables:
 targetLabels = cell2mat(struct2cell(load(strcat(recordingFolder,'/trainingVec'))));
 
 numClasses = length(unique(targetLabels));                      % set number of possible targets (classes)
-trialsForTest = 30;                                             % get number of trials for test set
+%trialsForTest = 30;                                             % get number of trials for test set
 
 %% Split data
 idleIdx = find(targetLabels == 3);                                                      % find idle trials

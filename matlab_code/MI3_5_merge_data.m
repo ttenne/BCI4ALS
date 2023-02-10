@@ -1,5 +1,4 @@
-function MI3_5_merge_data(recordingFolder, filtered_dir_names)
-numTrials = 30;
+function [numTrials] = MI3_5_merge_data(recordingFolder, filtered_dir_names)
 
 %merge trainig vectors
 tempTrainingVec1 = load(strcat(char(filtered_dir_names(1)),'/trainingVec.mat'));
@@ -32,10 +31,11 @@ current_trial = 0;
 for i = 1:length(filtered_dir_names)
     tempMIData = load(strcat(char(filtered_dir_names(i)),'/MIData.mat'));
     tempMIData = cell2mat(struct2cell(tempMIData));
-    if size(tempMIData,1) ~= numTrials
-        fprintf('%s corrupted!\n', strcat(char(filtered_dir_names(i)),'/MIData.mat'));
-        fprintf('%s has %d trials instead of %d\n', strcat(char(filtered_dir_names(i)),'/MIData.mat'), size(tempMIData,1), numTrials);
-    end
+    %if size(tempMIData,1) ~= numTrials
+    %    fprintf('%s corrupted!\n', strcat(char(filtered_dir_names(i)),'/MIData.mat'));
+    %    fprintf('%s has %d trials instead of %d\n', strcat(char(filtered_dir_names(i)),'/MIData.mat'), size(tempMIData,1), numTrials);
+    %end
+    numTrials = size(tempMIData,1);
     if size(tempMIData1,2) ~= size(tempMIData,2) && size(tempMIData1,3) ~= size(tempMIData,3)
         fprintf('MIData from %s is not the same size as MIData from %s\n', char(filtered_dir_names(i)), char(filtered_dir_names(1)));
     else
@@ -49,5 +49,4 @@ save(strcat(recordingFolder,'/MIData.mat'),'MIData');
 
 %copy additional files
 copyfile(strcat(char(filtered_dir_names(1)),'/EEG_chans.mat'), recordingFolder);
-
 end

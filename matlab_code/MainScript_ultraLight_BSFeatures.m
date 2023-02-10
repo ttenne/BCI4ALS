@@ -46,9 +46,9 @@ end
 recordingFolder ='C:\Users\yaels\Desktop\UnitedRecordings';
 
 %% Merge several sessions
-MI3_5_merge_data(recordingFolder, filtered_dir_names);
+trialsForTest = MI3_5_merge_data(recordingFolder, filtered_dir_names);
 disp('Finished merging the data.');
 
 %% Extract features and labels
-MI4_featureExtraction(recordingFolder);
+MI4_featureExtraction(recordingFolder, trialsForTest);
 disp('Finished splitting the data.');
