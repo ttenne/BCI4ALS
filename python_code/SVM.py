@@ -80,7 +80,7 @@ def printSelectedFeatures(selected_features, useBS, useAR, useSampEn, useACSP):
     if useACSP:
         print(f'ACSP_count = {ACSP_count}')
 
-def svmPredict(path='C:\\Users\\yaels\\Desktop\\UnitedRecordings', lags=21, lags_starting_point=130, useBS=True, useAR=True, useSampEn=True, r_val=0.2, useACSP=True, initial_var_trial_num=20, mu=0.95, useFeatSelAlg=True, num_of_selected_features=250, print_selected_features=False, useAutoEnc=True):
+def svmPredict(path='C:\\Users\\yaels\\Desktop\\UnitedRecordings', lags=21, lags_starting_point=130, useBS=False, useAR=False, useSampEn=False, r_val=0.2, useACSP=False, initial_var_trial_num=20, mu=0.95, useFeatSelAlg=False, num_of_selected_features=250, print_selected_features=False, useAutoEnc=False):
     '''lags=21, lags_starting_point=130 based on validation set Sub20220821001-Sub20220821003'''
     #fetch data
     print('Fetching MIData...')
@@ -126,8 +126,8 @@ def svmPredict(path='C:\\Users\\yaels\\Desktop\\UnitedRecordings', lags=21, lags
     #apply feature selection
     if useFeatSelAlg:
         print('Executing feature selection...')
-        MI_values = mutual_info_classif(X_train, y_train)
-        # validate number of selected features - this is here and not in the validation.py file, because we want to reuse the exact same features for each iteration so using the svmPredict function every time is a huge waste of time
+        MI_values = mutual_info_classif(X_train, y_train, discrete_features=False)
+        # # validate number of selected features - this is here and not in the validation.py file, because we want to reuse the exact same features for each iteration so using the svmPredict function every time is a huge waste of time
         # accuracies = []
         # num_of_selected_features_list = list(range(10, 400))
         # for num_of_selected_features in num_of_selected_features_list:
@@ -142,8 +142,7 @@ def svmPredict(path='C:\\Users\\yaels\\Desktop\\UnitedRecordings', lags=21, lags
         # plt.plot(num_of_selected_features_list, accuracies)
         # plt.xlabel('num_of_selected_features')
         # plt.ylabel('validation score')
-        # plt.savefig('validateSampEn.png')
-        # print(f'accuracies = {accuracies}')
+        # plt.savefig('validateMIFeatSel.png')
         # print(f'max accuracy = {np.max(accuracies)}')
         # print(f'num_of_selected_features = {np.argmax(accuracies)}')
         # exit()
@@ -164,5 +163,6 @@ def svmPredict(path='C:\\Users\\yaels\\Desktop\\UnitedRecordings', lags=21, lags
     return y_pred, y_test
 
 if __name__ == "__main__":
-    y_pred, y_test = svmPredict(useBS=True, useAR=True, useSampEn=False, useACSP=False, useFeatSelAlg=True, num_of_selected_features=66, print_selected_features=True, useAutoEnc=True)
+    y_pred, y_test = svmPredict(useBS=True, useAR=True, useSampEn=False, useACSP=False, useFeatSelAlg=True, num_of_selected_features=11, print_selected_features=True, useAutoEnc=True)
+    print('results:')
     print(f'accuracy = {accuracy(y_test, y_pred, print_table=True)}')

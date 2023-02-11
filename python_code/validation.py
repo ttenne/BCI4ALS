@@ -59,7 +59,6 @@ def validateAR(min_lags=15, max_lags=25, min_start_point=100, max_start_point=15
                 break
             else:
                 accuracies[i][j] = SVM.accuracy(y_test, y_pred)
-    print(accuracies)
     fig, ax = plt.subplots(subplot_kw={"projection": "3d"})
     X, Y = np.meshgrid(lags_numbers, starting_points)
     surf = ax.plot_surface(X, Y, accuracies, cmap=cm.coolwarm, linewidth=0, antialiased=False)
