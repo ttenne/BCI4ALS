@@ -7,5 +7,5 @@ end_dir = strcat(recordingsFolder,'Sub20220823001');
 %MainScript_light_BSFeatures(recordingsFolder, start_dir, end_dir);
 %MainScript_lightRandom(recordingsFolder, start_dir, end_dir);
 %MainScript_lightRandom_BSFeatures(recordingsFolder, start_dir, end_dir);
-MainScript_ultraLight(recordingsFolder, start_dir, end_dir);
-%MainScript_ultraLight_BSFeatures(recordingsFolder, start_dir, end_dir);
+%MainScript_ultraLight(recordingsFolder, start_dir, end_dir);
+MainScript_ultraLight_BSFeatures(recordingsFolder, start_dir, end_dir);

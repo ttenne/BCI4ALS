@@ -161,8 +161,3 @@ def svmPredict(path='C:\\Users\\yaels\\Desktop\\UnitedRecordings', lags=21, lags
     print('Executing classification...')
     y_pred = clf.predict(X_test_selected)
     return y_pred, y_test
-
-if __name__ == "__main__":
-    y_pred, y_test = svmPredict(useBS=True, useAR=True, useSampEn=False, useACSP=False, useFeatSelAlg=True, num_of_selected_features=11, print_selected_features=True, useAutoEnc=True)
-    print('results:')
-    print(f'accuracy = {accuracy(y_test, y_pred, print_table=True)}')
