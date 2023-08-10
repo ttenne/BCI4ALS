@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 from tabulate import tabulate
 from sklearn.feature_selection import mutual_info_classif
 from AutoEnc import AutoEncoder
+from GAN import GAN
 
 tag_dict = {
     3: 'idle ',
@@ -81,6 +82,8 @@ def printSelectedFeatures(selected_features, useBS, useAR, useSampEn, useACSP):
         print(f'ACSP_count = {ACSP_count}')
 
 def fetchData(path, useAutoEnc, useGAN):
+    if useAutoEnc and useGAN:
+        raise ValueError("Can't use both useAutoEnc and useGan")
     MIData = scipy.io.loadmat(f'{path}\\MIData.mat')['MIData']
     y_train = scipy.io.loadmat(f'{path}\\LabelTrain.mat')['LabelTrain']
     y_train = np.reshape(y_train, -1)
@@ -94,6 +97,13 @@ def fetchData(path, useAutoEnc, useGAN):
         print('Filtering MIData...')
         MIData_train = auto_encoder.predict(MIData_train)
         MIData_test = auto_encoder.predict(MIData_test)
+    if useGAN:
+        #this doesn't really make any sense
+        #need to create GAN for each class ans generate data separately for each class
+        #then arrange all train data somehow and continue as normal
+        gan = GAN(train_data=MIData_train, batch_size=3)
+        gan.train(num_epochs=10)
+        MIData_train_syn = np.array(gan.generate(), dtype=np.float64)
     return MIData_train, MIData_test, y_train, y_test
 
 def svmPredict(path='C:\\Users\\yaels\\Desktop\\UnitedRecordings', lags=21, lags_starting_point=130, useBS=False, useAR=False, useSampEn=False, r_val=0.2,
