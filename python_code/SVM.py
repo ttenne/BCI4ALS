@@ -80,10 +80,7 @@ def printSelectedFeatures(selected_features, useBS, useAR, useSampEn, useACSP):
     if useACSP:
         print(f'ACSP_count = {ACSP_count}')
 
-def svmPredict(path='C:\\Users\\yaels\\Desktop\\UnitedRecordings', lags=21, lags_starting_point=130, useBS=False, useAR=False, useSampEn=False, r_val=0.2, useACSP=False, initial_var_trial_num=20, mu=0.95, useFeatSelAlg=False, num_of_selected_features=250, print_selected_features=False, useAutoEnc=False):
-    '''lags=21, lags_starting_point=130 based on validation set Sub20220821001-Sub20220821003'''
-    #fetch data
-    print('Fetching MIData...')
+def fetchData(path, useAutoEnc, useGAN):
     MIData = scipy.io.loadmat(f'{path}\\MIData.mat')['MIData']
     y_train = scipy.io.loadmat(f'{path}\\LabelTrain.mat')['LabelTrain']
     y_train = np.reshape(y_train, -1)
@@ -97,6 +94,15 @@ def svmPredict(path='C:\\Users\\yaels\\Desktop\\UnitedRecordings', lags=21, lags
         print('Filtering MIData...')
         MIData_train = auto_encoder.predict(MIData_train)
         MIData_test = auto_encoder.predict(MIData_test)
+    return MIData_train, MIData_test, y_train, y_test
+
+def svmPredict(path='C:\\Users\\yaels\\Desktop\\UnitedRecordings', lags=21, lags_starting_point=130, useBS=False, useAR=False, useSampEn=False, r_val=0.2,
+               useACSP=False, initial_var_trial_num=20, mu=0.95, useFeatSelAlg=False, num_of_selected_features=250, print_selected_features=False,
+               useAutoEnc=False, useGAN=False):
+    '''lags=21, lags_starting_point=130 based on validation set Sub20220821001-Sub20220821003'''
+    #fetch data
+    print('Fetching MIData...')
+    MIData_train, MIData_test, y_train, y_test = fetchData(path, useAutoEnc, useGAN)
     #arrange train and test set
     X_train = []
     X_test = []
