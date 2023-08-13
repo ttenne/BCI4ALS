@@ -98,18 +98,29 @@ def fetchData(path, useAutoEnc, useGAN):
         MIData_train = auto_encoder.predict(MIData_train)
         MIData_test = auto_encoder.predict(MIData_test)
     if useGAN:
-        #this doesn't really make any sense
-        #need to create GAN for each class ans generate data separately for each class
-        #then arrange all train data somehow and continue as normal
-        gan = GAN(train_data=MIData_train, batch_size=3)
-        gan.train(num_epochs=10)
-        MIData_train_syn = np.array(gan.generate(), dtype=np.float64)
+        MIData_train_syn = []
+        for label in [1,2,3]:
+            MIData_train_temp = MIData_train[y_train == label]
+            gan = GAN(train_data=MIData_train_temp, batch_size=3)
+            gan.train()
+            MIData_train_syn.append(np.array(gan.generate(), dtype=np.float64))
+        MIData_train_syn = np.array(MIData_train_syn)
+        MIData_train_syn = np.reshape(MIData_train_syn, (MIData_train_syn.shape[0]*MIData_train_syn.shape[1], MIData_train_syn.shape[2], MIData_train_syn.shape[3]))
+        y_train_syn = np.array([1 + i//(MIData_train_syn.shape[0]//3) for i in range(len(MIData_train_syn))])
+        perm = np.random.permutation(len(MIData_train_syn))
+        MIData_train_syn = MIData_train_syn[perm]
+        y_train_syn = y_train_syn[perm]
+        np.random.shuffle(MIData_train_syn)
+        MIData_train = np.concatenate((MIData_train, MIData_train_syn))
+        y_train = np.concatenate((y_train, y_train_syn))
     return MIData_train, MIData_test, y_train, y_test
 
 def svmPredict(path='C:\\Users\\yaels\\Desktop\\UnitedRecordings', lags=21, lags_starting_point=130, useBS=False, useAR=False, useSampEn=False, r_val=0.2,
                useACSP=False, initial_var_trial_num=20, mu=0.95, useFeatSelAlg=False, num_of_selected_features=250, print_selected_features=False,
                useAutoEnc=False, useGAN=False):
     '''lags=21, lags_starting_point=130 based on validation set Sub20220821001-Sub20220821003'''
+    if useBS and useGAN:
+        raise ValueError("Can't use both useBS and useGan")
     #fetch data
     print('Fetching MIData...')
     MIData_train, MIData_test, y_train, y_test = fetchData(path, useAutoEnc, useGAN)
