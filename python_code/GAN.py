@@ -38,7 +38,7 @@ class Generator(nn.Module):
         return output
 
 class GAN():
-    def __init__(self, train_data, batch_size=32, lr=0.001):
+    def __init__(self, train_data, batch_size=3, lr=0.001):
         train_data_temp = torch.Tensor(train_data)
         self.original_shape = train_data.shape[1:]
         train_data_temp = train_data_temp.reshape((train_data_temp.shape[0], -1))

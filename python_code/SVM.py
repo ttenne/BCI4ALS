@@ -9,6 +9,7 @@ from tabulate import tabulate
 from sklearn.feature_selection import mutual_info_classif
 from AutoEnc import AutoEncoder
 from GAN import GAN
+from TimeGAN import TimeGANAux
 
 tag_dict = {
     3: 'idle ',
@@ -101,7 +102,7 @@ def fetchData(path, useAutoEnc, useGAN):
         MIData_train_syn = []
         for label in [1,2,3]:
             MIData_train_temp = MIData_train[y_train == label]
-            gan = GAN(train_data=MIData_train_temp, batch_size=3)
+            gan = TimeGANAux(train_data=MIData_train_temp)
             gan.train()
             MIData_train_syn.append(np.array(gan.generate(), dtype=np.float64))
         MIData_train_syn = np.array(MIData_train_syn)
