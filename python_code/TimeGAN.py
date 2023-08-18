@@ -23,7 +23,7 @@ class TimeGANAux():
         self.train_data = np.copy(train_data)
         self.synth = None
     
-    def train(self, train_steps=3000):
+    def train(self, train_steps=10000):
         if path.exists('data/synthesizer_eeg.pkl'):
             self.synth = TimeGAN.load('data/synthesizer_eeg.pkl')
         else:
