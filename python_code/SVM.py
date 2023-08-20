@@ -82,9 +82,8 @@ def printSelectedFeatures(selected_features, useBS, useAR, useSampEn, useACSP):
     if useACSP:
         print(f'ACSP_count = {ACSP_count}')
 
-def fetchData(path, useAutoEnc, useGAN):
-    if useAutoEnc and useGAN:
-        raise ValueError("Can't use both useAutoEnc and useGan")
+def fetchData(path, useAutoEnc, useGAN, num_of_gen_batches):
+    batch_size = None
     MIData = scipy.io.loadmat(f'{path}\\MIData.mat')['MIData']
     y_train = scipy.io.loadmat(f'{path}\\LabelTrain.mat')['LabelTrain']
     y_train = np.reshape(y_train, -1)
@@ -92,19 +91,14 @@ def fetchData(path, useAutoEnc, useGAN):
     y_test = scipy.io.loadmat(f'{path}\\LabelTest.mat')['LabelTest']
     y_test = np.reshape(y_test, -1)
     MIData_test = MIData[len(y_train):]
-    if useAutoEnc:
-        print('Creating auto-encoder CNN...')
-        auto_encoder = AutoEncoder(MIData_train)#, epochs=10)
-        print('Filtering MIData...')
-        MIData_train = auto_encoder.predict(MIData_train)
-        MIData_test = auto_encoder.predict(MIData_test)
-    if useGAN:
+    if useGAN and num_of_gen_batches > 0:
+        batch_size = len(MIData_train)//3
         MIData_train_syn = []
         for label in [1,2,3]:
             MIData_train_temp = MIData_train[y_train == label]
-            gan = TimeGANAux(train_data=MIData_train_temp)
+            gan = TimeGANAux(train_data=MIData_train_temp, label=label, batch_size=batch_size)
             gan.train()
-            MIData_train_syn.append(np.array(gan.generate(), dtype=np.float64))
+            MIData_train_syn.append(np.array(gan.generate(num_of_gen_batches), dtype=np.float64))
         MIData_train_syn = np.array(MIData_train_syn)
         MIData_train_syn = np.reshape(MIData_train_syn, (MIData_train_syn.shape[0]*MIData_train_syn.shape[1], MIData_train_syn.shape[2], MIData_train_syn.shape[3]))
         y_train_syn = np.array([1 + i//(MIData_train_syn.shape[0]//3) for i in range(len(MIData_train_syn))])
@@ -114,17 +108,23 @@ def fetchData(path, useAutoEnc, useGAN):
         np.random.shuffle(MIData_train_syn)
         MIData_train = np.concatenate((MIData_train, MIData_train_syn))
         y_train = np.concatenate((y_train, y_train_syn))
-    return MIData_train, MIData_test, y_train, y_test
+    if useAutoEnc:
+        print('Creating auto-encoder CNN...')
+        auto_encoder = AutoEncoder(MIData_train)#, epochs=10)
+        print('Filtering MIData...')
+        MIData_train = auto_encoder.predict(MIData_train)
+        MIData_test = auto_encoder.predict(MIData_test)
+    return MIData_train, MIData_test, y_train, y_test, batch_size
 
 def svmPredict(path='C:\\Users\\yaels\\Desktop\\UnitedRecordings', lags=21, lags_starting_point=130, useBS=False, useAR=False, useSampEn=False, r_val=0.2,
                useACSP=False, initial_var_trial_num=20, mu=0.95, useFeatSelAlg=False, num_of_selected_features=250, print_selected_features=False,
-               useAutoEnc=False, useGAN=False):
+               useAutoEnc=False, useGAN=False, num_of_gen_batches=1):
     '''lags=21, lags_starting_point=130 based on validation set Sub20220821001-Sub20220821003'''
     if useBS and useGAN:
         raise ValueError("Can't use both useBS and useGan")
     #fetch data
     print('Fetching MIData...')
-    MIData_train, MIData_test, y_train, y_test = fetchData(path, useAutoEnc, useGAN)
+    MIData_train, MIData_test, y_train, y_test, batch_size = fetchData(path, useAutoEnc, useGAN, num_of_gen_batches)
     #arrange train and test set
     X_train = []
     X_test = []
@@ -157,23 +157,29 @@ def svmPredict(path='C:\\Users\\yaels\\Desktop\\UnitedRecordings', lags=21, lags
         MI_values = mutual_info_classif(X_train, y_train, discrete_features=False)
         # # validate number of selected features - this is here and not in the validation.py file, because we want to reuse the exact same features for each iteration so using the svmPredict function every time is a huge waste of time
         # accuracies = []
-        # num_of_selected_features_list = list(range(10, 400))
+        # init_feat_num = 10
+        # num_of_selected_features_list = list(range(init_feat_num, X_train.shape[-1]+1))
+        # sorted_features = sorted(range(len(MI_values)), key = lambda sub: MI_values[sub])
         # for num_of_selected_features in num_of_selected_features_list:
         #     print(f'running with {num_of_selected_features} features...')
-        #     selected_features = sorted(range(len(MI_values)), key = lambda sub: MI_values[sub])[-num_of_selected_features:]
+        #     selected_features = sorted_features[-num_of_selected_features:]
         #     X_train_selected = X_train[:, selected_features]
         #     X_test_selected = X_test[:, selected_features]
         #     clf = svm.SVC()
         #     clf.fit(X_train_selected, y_train)
         #     y_pred = clf.predict(X_test_selected)
         #     accuracies.append(accuracy(y_test, y_pred))
-        # plt.plot(num_of_selected_features_list, accuracies)
-        # plt.xlabel('num_of_selected_features')
-        # plt.ylabel('validation score')
-        # plt.savefig('validateMIFeatSel.png')
+        # # plt.plot(num_of_selected_features_list, accuracies)
+        # # plt.xlabel('num_of_selected_features')
+        # # plt.ylabel('validation score')
+        # # plt.savefig(f'validateMIFeatSel with {num_of_gen_batches * 30} TimeGAN trials.png')
+        # # plt.clf()
+        # num_synth_feat = 0 if batch_size is None else num_of_gen_batches * batch_size
+        # with open(f'{num_synth_feat} synth features accuracies.txt', 'w') as fp:
+        #     fp.writelines((str(num_of_selected_features_list)+'\n', str(accuracies)+'\n'))
         # print(f'max accuracy = {np.max(accuracies)}')
-        # print(f'num_of_selected_features = {np.argmax(accuracies)}')
-        # exit()
+        # print(f'num_of_selected_features = {init_feat_num + np.argmax(accuracies)}')
+        # return
         selected_features = sorted(range(len(MI_values)), key = lambda sub: MI_values[sub])[-num_of_selected_features:] #extract num_of_selected_features features with best MI value
         if print_selected_features:
             printSelectedFeatures(selected_features, useBS, useAR, useSampEn, useACSP)

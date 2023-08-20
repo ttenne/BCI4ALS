@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 class AutoEncoder():
 
     def __init__(self, MIData, filters_per_layer=[32,16,8], kernel_sizes=[5,5,5], epochs=250, load_weights=False):
-        self.model = self.getModel(MIData, filters_per_layer, kernel_sizes, epochs, load_weights, show_train_error=True)
+        self.model = self.getModel(MIData, filters_per_layer, kernel_sizes, epochs, load_weights, show_train_error=False)
         
     def reshapeMIData(self, orig):
         dim1 = len(orig) #trials
