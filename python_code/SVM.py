@@ -118,7 +118,7 @@ def fetchData(path, useAutoEnc, useGAN, num_of_gen_batches):
 
 def svmPredict(path='C:\\Users\\yaels\\Desktop\\UnitedRecordings', lags=21, lags_starting_point=130, useBS=False, useAR=False, useSampEn=False, r_val=0.2,
                useACSP=False, initial_var_trial_num=20, mu=0.95, useFeatSelAlg=False, num_of_selected_features=250, print_selected_features=False,
-               useAutoEnc=False, useGAN=False, num_of_gen_batches=1):
+               useAutoEnc=False, useGAN=False, num_of_gen_batches=32):
     '''lags=21, lags_starting_point=130 based on validation set Sub20220821001-Sub20220821003'''
     if useBS and useGAN:
         raise ValueError("Can't use both useBS and useGan")
