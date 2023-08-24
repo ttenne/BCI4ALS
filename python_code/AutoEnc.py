@@ -1,10 +1,11 @@
 import numpy as np
 import tensorflow as tf
 import matplotlib.pyplot as plt
+from os import path
 
 class AutoEncoder():
 
-    def __init__(self, MIData, filters_per_layer=[32,16,8], kernel_sizes=[5,5,5], epochs=250, load_weights=False):
+    def __init__(self, MIData, filters_per_layer=[32,16,8], kernel_sizes=[5,5,5], epochs=250, load_weights=True):
         self.model = self.getModel(MIData, filters_per_layer, kernel_sizes, epochs, load_weights, show_train_error=False)
         
     def reshapeMIData(self, orig):
@@ -18,7 +19,7 @@ class AutoEncoder():
                     reshaped[i][j].append(sample)
         return np.array(reshaped)
     
-    def getModel(self, MIData, filters_per_layer, kernel_sizes, epochs, load_weights, show_train_error=False):
+    def getModel(self, MIData, filters_per_layer, kernel_sizes, epochs, load_weights, show_train_error):
         reshaped_MIData = self.reshapeMIData(MIData)
         train_val_split_percent = 1 #0.8
         train_MIData = reshaped_MIData[:int(train_val_split_percent*len(reshaped_MIData))]
@@ -32,11 +33,11 @@ class AutoEncoder():
         model.add(tf.keras.layers.Conv1D(train_MIData.shape[-1], 1))#, activation='relu'))
         # model.summary()
         model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=1e-3), loss=tf.losses.MeanSquaredError())
-        if load_weights:
-            model.load_weights('auto_encoder_weights.h5')
+        if load_weights and path.exists('data/auto_encoder_weights.h5'):
+            model.load_weights('data/auto_encoder_weights.h5')
         else:
             history = model.fit(x=train_MIData, y=train_MIData, epochs=epochs, validation_data=(val_MIData, val_MIData))
-            model.save_weights('auto_encoder_weights.h5', overwrite=True)
+            model.save_weights('data/auto_encoder_weights.h5', overwrite=True)
             if show_train_error:
                 plt.plot(history.history['loss'], label='train_loss')
                 if train_val_split_percent < 1:
