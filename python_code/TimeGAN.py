@@ -25,13 +25,14 @@ class TimeGANAux():
                                         layers_dim=dim)
         self.synth = None
     
-    def train(self, train_steps=10000):
-        if path.exists(f'data/synthesizer_eeg__label_{self.label}_batch_size_{self.batch_size}_train_steps_{train_steps}.pkl'):
-            self.synth = TimeGAN.load(f'data/synthesizer_eeg__label_{self.label}_batch_size_{self.batch_size}_train_steps_{train_steps}.pkl')
+    def train(self, train_steps=300):
+        file_name = f'data/synthesizer_eeg__label_{self.label}_batch_size_{self.batch_size}_train_steps_{train_steps}.pkl'
+        if path.exists(file_name):
+            self.synth = TimeGAN.load(file_name)
         else:
             self.synth = TimeGAN(model_parameters=self.gan_args, hidden_dim=self.hidden_dim, seq_len=self.seq_len, n_seq=self.n_seq, gamma=self.gamma)
             self.synth.train(self.train_data, train_steps=train_steps)
-            self.synth.save(f'data/synthesizer_eeg__label_{self.label}_batch_size_{self.batch_size}_train_steps_{train_steps}.pkl')
+            self.synth.save(file_name)
     
     def generate(self, num_of_batches=1):
         synth_data = self.synth.sample(num_of_batches*self.batch_size - 1)
